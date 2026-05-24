@@ -2,11 +2,20 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 
+
+app.use(express.static(path.join(__dirname, '../dist')));
+
 const server = http.createServer(app);
+
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
+});
 
 const io = new Server(server, {
   cors: {
@@ -20,7 +29,7 @@ const rooms = {};
 io.on('connection', (socket) => {
   socket.on('join_room', (roomId, playerName, contestSize = 3) => {
     socket.join(roomId);
-    
+
     if (!rooms[roomId]) {
       rooms[roomId] = {
         players: {},
@@ -37,7 +46,7 @@ io.on('connection', (socket) => {
     }
 
     const room = rooms[roomId];
-    
+
     let role = null;
     const playerKeys = Object.keys(room.players);
     if (playerKeys.length === 0) {
@@ -81,9 +90,9 @@ io.on('connection', (socket) => {
       if (data.result === 'X' || data.result === 'O') {
         room.scores[data.result] += 1;
       }
-      
+
       const remainingMatches = room.contestSize - room.matchesPlayed;
-      
+
       if (room.scores.X > room.scores.O + remainingMatches) {
         room.seriesWinner = 'X';
       } else if (room.scores.O > room.scores.X + remainingMatches) {
@@ -91,7 +100,7 @@ io.on('connection', (socket) => {
       } else if (remainingMatches === 0 && room.scores.X === room.scores.O) {
         room.seriesWinner = 'Draw';
       }
-      
+
       io.to(roomId).emit('score_updated', {
         scores: room.scores,
         matchesPlayed: room.matchesPlayed,
@@ -120,13 +129,13 @@ io.on('connection', (socket) => {
       room.matchesPlayed = 0;
       room.scores = { X: 0, O: 0 };
       room.seriesWinner = null;
-      
+
       const resetState = {
         history: [Array(9).fill(null)],
         currentMove: 0
       };
       room.gameState = resetState;
-      
+
       io.to(roomId).emit('series_reset', {
         gameState: resetState,
         scores: room.scores,

@@ -7,7 +7,7 @@ import { ScoreBoard } from './components/ScoreBoard';
 import { calculateWinner, calculateDraw, getWinningLine } from './utils/gameLogic';
 import type { Player, GameState } from './utils/gameLogic';
 
-const SOCKET_URL = 'http://localhost:3001';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || (import.meta.env.PROD ? window.location.origin : 'http://localhost:3001');
 
 type PlayMode = 'local' | 'online';
 type OnlineState = 'menu' | 'hosting' | 'joining' | 'in_room';
