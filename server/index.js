@@ -13,7 +13,8 @@ app.use(express.static(path.join(__dirname, '../dist')));
 const server = http.createServer(app);
 
 
-app.get('*', (req, res) => {
+// Anything that doesn't match the static files, hand off to react router
+app.get('/(.*)', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
