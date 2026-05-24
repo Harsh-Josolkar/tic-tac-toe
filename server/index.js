@@ -14,7 +14,7 @@ const server = http.createServer(app);
 
 
 // Anything that doesn't match the static files, hand off to react router
-app.get('/(.*)', (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
